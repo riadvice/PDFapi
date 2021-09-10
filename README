@@ -26,3 +26,4 @@ go get -u github.com/llgcode/draw2d
                 - get the annotations details of each page from /var/bigbluebutton/MeetingID/events.xml 
                 - draw on each page it's annotations and save the page on /tmp/presentationID-done
             - merge the pdf pages on /tmp/presentationID-done on one pdf file and save in /tmp/presentationID-final
+ 
