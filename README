@@ -1,0 +1,8 @@
+go mod init pdfannotations
+go mod vendor (or go mod tidy)
+
+go get github.com/gorilla/mux
+go get github.com/jung-kurt/gofpdf
+go get github.com/phpdave11/gofpdi
+go get github.com/llgcode/draw2d
+

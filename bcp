@@ -1,0 +1,540 @@
+//package main
+
+import (
+	"encoding/json"
+	"encoding/xml"
+	"image/color"
+	"io"
+	"io/ioutil"
+	"log"
+	"math"
+	"net/http"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+
+	"github.com/gorilla/mux"
+	"github.com/jung-kurt/gofpdf"
+	"github.com/jung-kurt/gofpdf/contrib/gofpdi"
+
+	"github.com/llgcode/draw2d"
+	"github.com/llgcode/draw2d/draw2dpdf"
+)
+
+// Parent node of events
+type Recording struct {
+	Meeting   Meeting `xml:"meeting" json:"meeting"`
+	MeetingID string  `xml:"meeting_id,attr" json:"_meeting_id"`
+	Event     []Event `xml:"event" json:"event"`
+}
+
+// First child of recording := meeting
+type Meeting struct {
+	ID string `xml:"id,attr" json:"_id"`
+}
+
+// Second child of recording := Event
+type Event struct {
+	Eventname      string  `xml:"eventname,attr" json:"_eventname"`
+	Presentation   string  `xml:"presentation" json:"presentation"`
+	WhiteboardID   string  `xml:"whiteboardId" json:"whiteboardId"`
+	PageNumber     int     `xml:"pageNumber" json:"pageNumber"`
+	Type           string  `xml:"type" json:"type"`
+	X              float64 `xml:"x" json:"x,omitempty"`
+	Y              float64 `xml:"y" json:"y,omitempty"`
+	FontColor      int     `xml:"fontColor" json:"fontColor,omitempty"`
+	TextBoxWidth   float64 `xml:"textBoxWidth" json:"textBoxWidth,omitempty"`
+	TextBoxHeight  float64 `xml:"textBoxHeight" json:"textBoxHeight,omitempty"`
+	Text           string  `xml:"text" json:"text,omitempty"`
+	FontSize       int     `xml:"fontSize" json:"fontSize,omitempty"`
+	CalcedFontSize float64 `xml:"calcedFontSize" json:"calcedFontSize,omitempty"`
+	Position       int     `xml:"position" json:"position"`
+	DataPoints     string  `xml:"dataPoints" json:"dataPoints"`
+	Color          int     `xml:"color" json:"color,omitempty"`
+	Thickness      float64 `xml:"thickness" json:"thickness,omitempty"`
+	Dimensions     string  `xml:"dimensions" json:"dimensions,omitempty"`
+	Commands       string  `xml:"commands" json:"commands,omitempty"`
+}
+
+// one event elements shape structure (line, ellipse, triangle, rectangle)
+type ShapeDetails struct {
+	DataPoints string
+	Color      RGB
+	Thickness  float64
+}
+
+// pencil event details
+type PencilDetails struct {
+	Commands   string
+	DataPoints string
+	Color      color.RGBA
+	Thickness  float64
+}
+
+// text event details
+type TextDetails struct {
+	X          float64
+	Y          float64
+	Color      RGB
+	Width      float64
+	Height     float64
+	Text       string
+	FontSize   int
+	CalcedSize float64
+}
+
+//colors are in decimal format so we have to adapt them to ather formats
+type DEC struct {
+	Decimal_color int64
+}
+
+// red green blue format of color
+type RGB struct {
+	Red, Green, Blue int
+}
+
+// function to transform colors from decimal format to RGB format
+func (Dec_c DEC) Dec2RGB() RGB {
+
+	hex := string(strconv.FormatInt(Dec_c.Decimal_color, 16))
+	for len(hex) < 6 {
+		hex = "0" + hex
+	}
+	R, _ := strconv.ParseInt(hex[:2], 16, 10)
+	G, _ := strconv.ParseInt(hex[2:4], 16, 18)
+	B, _ := strconv.ParseInt(hex[4:], 16, 10)
+	return RGB{int(R), int(G), int(B)}
+}
+
+// function to transform colors from decimal format to RGBA format
+func (Dec_c DEC) Dec2RGBA() (c color.RGBA) {
+	hex := string(strconv.FormatInt(Dec_c.Decimal_color, 16))
+	for len(hex) < 6 {
+		hex = "0" + hex
+	}
+	hexToByte := func(b byte) byte {
+		switch {
+		case b >= '0' && b <= '9':
+			return b - '0'
+		case b >= 'a' && b <= 'f':
+			return b - 'a' + 10
+		case b >= 'A' && b <= 'F':
+			return b - 'A' + 10
+		}
+		return 0
+	}
+	c.R = hexToByte(hex[0])<<4 + hexToByte(hex[1])
+	c.G = hexToByte(hex[2])<<4 + hexToByte(hex[3])
+	c.B = hexToByte(hex[4])<<4 + hexToByte(hex[5])
+	c.A = 0xff
+	return c
+}
+
+// coordinates array in form of string
+type Coordinates struct {
+	str string
+}
+
+// funtion to return array of integers in string to an array of float
+func (str Coordinates) getPoints() []float64 {
+	var points []float64
+	str.str = "[" + str.str + "]"
+	err := json.Unmarshal([]byte(str.str), &points)
+	if err != nil {
+		panic(err)
+	}
+	return points
+}
+
+// funtion to return array of integers in string to an array of integer
+func (str Coordinates) getCommands() []int {
+	var points []int
+	str.str = "[" + str.str + "]"
+	err := json.Unmarshal([]byte(str.str), &points)
+	if err != nil {
+		panic(err)
+	}
+	return points
+}
+
+//function to draw line to pdf in exact position
+func DrawLine(pdf *gofpdf.Fpdf, line ShapeDetails, size gofpdf.SizeType) {
+	pdf.SetDrawColor(line.Color.Red, line.Color.Green, line.Color.Blue)
+	pdf.SetLineWidth(getStrokeWidth(line.Thickness, size.Wd))
+	points := (Coordinates{line.DataPoints}).getPoints()
+	p0 := denormalizeCoord(points[0], size.Wd)
+	p1 := denormalizeCoord(points[1], size.Ht)
+	p2 := denormalizeCoord(points[2], size.Wd)
+	p3 := denormalizeCoord(points[3], size.Ht)
+	pdf.Line(p0, p1, p2, p3)
+}
+
+//function to draw ellipse to pdf in proportional coordinates based on the page size
+func DrawEllipse(pdf *gofpdf.Fpdf, ellipse ShapeDetails, size gofpdf.SizeType) {
+	pdf.SetDrawColor(ellipse.Color.Red, ellipse.Color.Green, ellipse.Color.Blue)
+	pdf.SetLineWidth(getStrokeWidth(ellipse.Thickness, size.Wd))
+	points := (Coordinates{ellipse.DataPoints}).getPoints()
+	// rx - horizontal radius, ry - vertical radius .. cx and cy - coordinates of the ellipse's center
+
+	rx := (points[2] - points[0]) / 2
+	ry := (points[3] - points[1]) / 2
+	cx := denormalizeCoord(rx+points[0], size.Wd)
+	cy := denormalizeCoord(ry+points[1], size.Ht)
+	rx = denormalizeCoord(math.Abs((points[2]-points[0])/2), size.Wd)
+	ry = denormalizeCoord(math.Abs((points[3]-points[1])/2), size.Ht)
+
+	pdf.Ellipse(cx, cy, rx, ry, 0, "")
+}
+
+//function to draw triangle to pdf in proportional coordinates based on the page size
+func DrawTriangle(pdf *gofpdf.Fpdf, triangle ShapeDetails, size gofpdf.SizeType) {
+	pdf.SetDrawColor(triangle.Color.Red, triangle.Color.Green, triangle.Color.Blue)
+	pdf.SetLineWidth(getStrokeWidth(triangle.Thickness, size.Wd))
+	points := (Coordinates{triangle.DataPoints}).getPoints()
+
+	xTop, yTop := denormalizeCoord(((points[2]-points[0])/2)+points[0], size.Wd), denormalizeCoord(points[1], size.Ht)
+	xBottomLeft, yBottomLeft := denormalizeCoord(points[0], size.Wd), denormalizeCoord(points[3], size.Ht)
+	xBottomRight, yBottomRight := denormalizeCoord(points[2], size.Wd), denormalizeCoord(points[3], size.Ht)
+
+	pdf.Polygon([]gofpdf.PointType{{X: xBottomLeft, Y: yBottomLeft}, {X: xBottomRight, Y: yBottomRight}, {X: xTop, Y: yTop}, {X: xBottomLeft, Y: yBottomLeft}, {X: xBottomRight, Y: yBottomRight}}, "")
+}
+
+//function to draw rectangle to pdf in proportional coordinates based on the page size
+func DrawRectangle(pdf *gofpdf.Fpdf, rectangle ShapeDetails, size gofpdf.SizeType) {
+	pdf.SetDrawColor(rectangle.Color.Red, rectangle.Color.Green, rectangle.Color.Blue)
+	pdf.SetLineWidth(getStrokeWidth(rectangle.Thickness, size.Wd))
+	points := (Coordinates{rectangle.DataPoints}).getPoints()
+
+	x := denormalizeCoord(points[0], size.Wd)
+	y := denormalizeCoord(points[1], size.Ht)
+	width := denormalizeCoord((points[2] - points[0]), size.Wd)
+	height := denormalizeCoord((points[3] - points[1]), size.Ht)
+
+	pdf.Rect(x, y, width, height, "")
+}
+
+//function to write text to pdf in  proportional coordinates based on the page size
+func WriteText(pdf *gofpdf.Fpdf, text TextDetails, size gofpdf.SizeType) {
+	pdf.SetTextColor(text.Color.Red, text.Color.Green, text.Color.Blue)
+	pdf.SetFont("Arial", "", 0)
+	pdf.SetFontUnitSize((text.CalcedSize / 100) * size.Ht)
+	BoxWidth := denormalizeCoord(text.Width, size.Wd)
+	BoxHeight := denormalizeCoord(text.Height, size.Ht)
+	pdf.MoveTo(denormalizeCoord(text.X, size.Wd), denormalizeCoord(text.Y, size.Ht))
+	pdf.SetAutoPageBreak(false, 0)
+	pdf.MultiCell(BoxWidth, BoxHeight, text.Text, gofpdf.BorderNone, gofpdf.AlignTop, false)
+}
+
+//function to draw pencil shape to pdf in proportional coordinates based on the page size
+func DrawPencil(pdf *gofpdf.Fpdf, pencil PencilDetails, size gofpdf.SizeType) {
+	commands := (Coordinates{pencil.Commands}).getCommands()
+	points := (Coordinates{pencil.DataPoints}).getPoints()
+	gc := draw2dpdf.NewGraphicContext(pdf)
+	gc.SetStrokeColor(pencil.Color)
+	gc.SetLineWidth(getStrokeWidth(pencil.Thickness, size.Wd))
+	gc.SetLineCap(draw2d.RoundCap)
+
+	for i, j := 0, 0; i < len(commands); i += 1 {
+		switch commands[i] {
+		case 1:
+			gc.MoveTo(denormalizeCoord(points[j], size.Wd), denormalizeCoord(points[j+1], size.Ht))
+			j += 2
+		case 2:
+			gc.LineTo(denormalizeCoord(points[j], size.Wd), denormalizeCoord(points[j+1], size.Ht))
+			j += 2
+		case 3:
+			gc.QuadCurveTo(
+				denormalizeCoord(points[j], size.Wd),
+				denormalizeCoord(points[j+1], size.Ht),
+				denormalizeCoord(points[j+2], size.Wd),
+				denormalizeCoord(points[j+3], size.Ht))
+			j += 4
+		case 4:
+			gc.CubicCurveTo(
+				denormalizeCoord(points[j], size.Wd),
+				denormalizeCoord(points[j+1], size.Ht),
+				denormalizeCoord(points[j+2], size.Wd),
+				denormalizeCoord(points[j+3], size.Ht),
+				denormalizeCoord(points[j+4], size.Wd),
+				denormalizeCoord(points[j+5], size.Ht))
+			j += 6
+		default:
+		}
+	}
+	gc.Stroke()
+	gc.Close()
+}
+
+//get calculated coordinates based on percantage of coordinates on page size
+func denormalizeCoord(normCoord float64, sideLength float64) float64 {
+	return ((normCoord / 100) * sideLength)
+}
+
+//get calculated stroke width based on percantage of coordinates on page size
+func getStrokeWidth(thickness float64, slideWidth float64) float64 {
+	return (thickness * slideWidth) / 100
+}
+
+// create presentation pdf file with annotations on it
+func CreateFinal(meet string, filename string) {
+	PresPath := "/var/bigbluebutton/" + meet + "/" + filename
+	foldername := filename + "-pages"
+
+	if pdf_exist(PresPath + "/" + filename + ".pdf") {
+		split_pdf(PresPath+"/"+filename+".pdf", "/tmp/"+foldername)
+		AddAnnotations(meet, "/tmp/"+foldername)
+		merge_pdf("/tmp/"+foldername+"-done", filename)
+	} else {
+		svg_to_pdf(PresPath+"/svgs", "/tmp/"+foldername, filename)
+		AddAnnotations(meet, "/tmp/"+foldername)
+		merge_pdf("/tmp/"+foldername+"-done", filename)
+	}
+}
+
+//split one pdf file into multiple pdf pages saved in specefic folder
+func split_pdf(filename string, foldername string) {
+	if _, err := os.Stat(foldername); os.IsNotExist(err) {
+		err := os.Mkdir(foldername, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+	cmd := exec.Command("tools/split", "-i", filename, "-o", foldername)
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+}
+
+//convert svg images in one folder to pdf files saved in specefic folder
+func svg_to_pdf(file string, output_dir string, prefix string) {
+	if _, err := os.Stat(output_dir); os.IsNotExist(err) {
+		err := os.Mkdir(output_dir, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+	cmd := exec.Command("tools/svgtopdf", "-n", prefix, "-o", output_dir, "-p", file)
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+}
+
+//add to all files in folder annotations
+func AddAnnotations(meeting string, folder string) {
+	files, _ := ioutil.ReadDir(folder)
+	if _, err := os.Stat(folder + "-done"); os.IsNotExist(err) {
+		err := os.Mkdir(folder+"-done", 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+	for _, f := range files {
+		pageN := GetIntInBetweenStr(f.Name(), "_", ".pdf")
+		err := InsertPage(meeting, f.Name(), folder+"-done"+"/"+f.Name(), pageN)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+//add to one pdf file it's specefic annotations
+func InsertPage(MeetingId string, input string, output string, pageNUM int) error {
+	var ThisPage []Event
+	presID := input[:len(input)-6]
+	var s gofpdf.SizeType
+	pdf := gofpdf.New(gofpdf.OrientationPortrait, gofpdf.UnitMillimeter, gofpdf.PageSizeA4, "")
+	tpl := gofpdi.ImportPage(pdf, "/tmp/"+presID+"-pages/"+input, 1, "/MediaBox")
+	pageSizes := gofpdi.GetPageSizes()
+	s.Wd, s.Ht = pageSizes[1]["/MediaBox"]["w"]*0.352778, pageSizes[1]["/MediaBox"]["h"]*0.352778
+	pdf.AddPageFormat(gofpdf.OrientationPortrait, s) // Draw imported template onto page
+	gofpdi.UseImportedTemplate(pdf, tpl, 0, 0, s.Wd, 0)
+	ThisPage = PageShapes(MeetingId, presID, pageNUM)
+	for _, element := range ThisPage {
+		switch {
+		case element.Type == "text":
+			{
+				text := TextDetails{
+					X: element.X,
+					Y: element.Y,
+					Color: DEC{
+						Decimal_color: int64(element.FontColor),
+					}.Dec2RGB(),
+					Width:      element.TextBoxWidth,
+					Height:     element.TextBoxHeight,
+					Text:       element.Text,
+					CalcedSize: element.CalcedFontSize}
+				WriteText(pdf, text, s)
+			}
+		case element.Type == "line":
+			{
+				LineDetails := ShapeDetails{
+					DataPoints: element.DataPoints,
+					Color: DEC{
+						Decimal_color: int64(element.Color),
+					}.Dec2RGB(),
+					Thickness: element.Thickness,
+				}
+				DrawLine(pdf, LineDetails, s)
+			}
+		case element.Type == "ellipse":
+			{
+				EllipseDetails := ShapeDetails{
+					DataPoints: element.DataPoints,
+					Color: DEC{
+						Decimal_color: int64(element.Color),
+					}.Dec2RGB(),
+					Thickness: element.Thickness,
+				}
+				DrawEllipse(pdf, EllipseDetails, s)
+			}
+		case element.Type == "triangle":
+			{
+				TriangleDetails := ShapeDetails{
+					DataPoints: element.DataPoints,
+					Color: DEC{
+						Decimal_color: int64(element.Color),
+					}.Dec2RGB(),
+					Thickness: element.Thickness,
+				}
+				DrawTriangle(pdf, TriangleDetails, s)
+
+			}
+		case element.Type == "rectangle":
+			{
+				RectangleDetails := ShapeDetails{
+					DataPoints: element.DataPoints,
+					Color: DEC{
+						Decimal_color: int64(element.Color),
+					}.Dec2RGB(),
+					Thickness: element.Thickness,
+				}
+				DrawRectangle(pdf, RectangleDetails, s)
+			}
+		case element.Type == "pencil":
+			{
+				MyPencil := PencilDetails{
+					DataPoints: element.DataPoints,
+					Color: DEC{
+						Decimal_color: int64(element.Color),
+					}.Dec2RGBA(),
+					Commands:  element.Commands,
+					Thickness: element.Thickness,
+				}
+				DrawPencil(pdf, MyPencil, s)
+			}
+		}
+	}
+	return pdf.OutputFileAndClose(output)
+}
+
+//merge multiple pdf pages in a specefic directory in one pdf file
+func merge_pdf(foldername string, presID string) {
+	out_dir := foldername[:len(foldername)-11] + "-final"
+	if _, err := os.Stat(out_dir); os.IsNotExist(err) {
+		err := os.Mkdir(out_dir, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+	cmd := exec.Command("tools/merge", "-p", foldername, "-o", out_dir+"/"+presID+".pdf", "-n", presID)
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+}
+
+//used to get the page number of the selected filename
+func GetIntInBetweenStr(str string, start string, end string) int {
+	s := strings.Index(str, start)
+	s += len(start)
+	e := strings.Index(str, end)
+	n, _ := strconv.Atoi(string(str[s:e]))
+	return n
+}
+
+//i/o events.xml
+func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
+	var data Recording
+	var InPage []Event
+	rawXmlData, _ := ioutil.ReadFile("/var/bigbluebutton/" + MeetingID + "/events.xml")
+	xml.Unmarshal([]byte(rawXmlData), &data)
+	var k = 0
+	for _, found := range data.Event {
+		if (found.Eventname) == "AddShapeEvent" && found.Presentation == PresentationID && found.PageNumber == PageNum {
+			InPage = append(InPage, found)
+			k++
+		}
+		if (found.Eventname) == "UndoAnnotationEvent" && found.Presentation == PresentationID && found.PageNumber == PageNum {
+			InPage = append(InPage[:k-1], InPage[k:]...)
+			k -= 2
+		}
+		if (found.Eventname) == "ClearWhiteboardEvent" && found.Presentation == PresentationID && found.PageNumber == PageNum {
+			InPage = nil //InPage[:0]
+			k = 0
+		}
+	}
+	return (InPage)
+}
+
+//check if a file exists
+func pdf_exist(filename string) bool {
+	if _, err := os.Stat(filename); err == nil {
+		return true
+	} else /* os.IsNotExist(err)*/ {
+		return false
+	}
+}
+
+//  download created pdf file with annotaions on it
+func ExportDone(writer http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	PresentationID := vars["file"]
+	MeetingID := vars["meeting"]
+	CreateFinal(MeetingID, PresentationID)
+	Filename := "/tmp/" + PresentationID + "-final/" + PresentationID + ".pdf"
+	//Check if file exists and open
+	Openfile, err := os.Open(Filename)
+	defer Openfile.Close() //Close after function return
+	if err != nil {
+		http.Error(writer, "File not found.", 404)
+	}
+
+	//File is found, create and send the correct headers
+
+	//Get the Content-Type of the file
+	//Create a buffer to store the header of the file in
+	FileHeader := make([]byte, 512)
+	//Copy the headers into the FileHeader buffer
+	Openfile.Read(FileHeader)
+	//Get content type of file
+	FileContentType := http.DetectContentType(FileHeader)
+
+	//Get the file size
+	FileStat, _ := Openfile.Stat()                     //Get info from file
+	FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get file size as a string
+
+	//Send the headers
+	writer.Header().Set("Content-Disposition", "attachment; filename="+PresentationID+".pdf")
+	writer.Header().Set("Content-Type", FileContentType)
+	writer.Header().Set("Content-Length", FileSize)
+
+	//Send the file
+	//We read 512 bytes from the file already, so we reset the offset back to 0
+	Openfile.Seek(0, 0)
+	io.Copy(writer, Openfile) //'Copy' the file to the client
+}
+
+//handle server regusests
+func handleRequests() {
+	myRouter := mux.NewRouter()
+	myRouter.HandleFunc("/{meeting}/{file}", ExportDone).Methods("GET")
+	log.Printf("Serving on HTTP port: 8100\n")
+	log.Fatal(http.ListenAndServe(":8100", myRouter))
+}
+
+func main() {
+	handleRequests()
+}

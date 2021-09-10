@@ -1,0 +1,27 @@
+# github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+## explicit
+github.com/golang/freetype/raster
+github.com/golang/freetype/truetype
+# github.com/gorilla/mux v1.8.0
+## explicit; go 1.12
+github.com/gorilla/mux
+# github.com/jung-kurt/gofpdf v1.16.2
+## explicit; go 1.12
+github.com/jung-kurt/gofpdf
+github.com/jung-kurt/gofpdf/contrib/gofpdi
+# github.com/llgcode/draw2d v0.0.0-20210904075650-80aa0a2a901d
+## explicit
+github.com/llgcode/draw2d
+github.com/llgcode/draw2d/draw2dbase
+github.com/llgcode/draw2d/draw2dkit
+github.com/llgcode/draw2d/draw2dpdf
+# github.com/phpdave11/gofpdi v1.0.13
+## explicit; go 1.12
+github.com/phpdave11/gofpdi
+# github.com/pkg/errors v0.8.1
+## explicit
+github.com/pkg/errors
+# golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a
+## explicit; go 1.12
+golang.org/x/image/font
+golang.org/x/image/math/fixed
