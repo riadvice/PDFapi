@@ -54,6 +54,7 @@ func ExportDone(writer http.ResponseWriter, request *http.Request) {
 func HandleRequests() {
 	myRouter := mux.NewRouter()
 	myRouter.HandleFunc("/{meeting}/{file}", ExportDone).Methods("GET")
+	myRouter.HandleFunc("/{meeting}/{file}/", ExportDone).Methods("GET")
 	log.Printf("Serving on HTTP port: 8100\n")
 	log.Fatal(http.ListenAndServe(":8100", myRouter))
 }
