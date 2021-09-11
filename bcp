@@ -343,7 +343,7 @@ func AddAnnotations(meeting string, folder string) {
 //add to one pdf file it's specefic annotations
 func InsertPage(MeetingId string, input string, output string, pageNUM int) error {
 	var ThisPage []Event
-	presID := input[:len(input)-6]
+	presID := GetStringBeforeChar(input,"_")
 	var s gofpdf.SizeType
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, gofpdf.UnitMillimeter, gofpdf.PageSizeA4, "")
 	tpl := gofpdi.ImportPage(pdf, "/tmp/"+presID+"-pages/"+input, 1, "/MediaBox")
@@ -455,6 +455,13 @@ func GetIntInBetweenStr(str string, start string, end string) int {
 	return n
 }
 
+//used to get the presentation id from filename
+func GetStringBeforeChar(str string,end string) string {
+	e := strings.Index(str, end)
+	sub := string(str[0:e])
+	return sub
+}
+
 //i/o events.xml
 func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 	var data Recording
@@ -532,7 +539,7 @@ func handleRequests() {
 	myRouter := mux.NewRouter()
 	myRouter.HandleFunc("/{meeting}/{file}", ExportDone).Methods("GET")
 	log.Printf("Serving on HTTP port: 8100\n")
-	log.Fatal(http.ListenAndServe(":8100", myRouter))
+	http.ListenAndServe(":8100", myRouter)
 }
 
 func main() {

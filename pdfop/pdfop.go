@@ -81,7 +81,7 @@ func AddAnnotations(meeting string, folder string) {
 //add to one pdf file it's specefic annotations
 func InsertPage(MeetingId string, input string, output string, pageNUM int) error {
 	var ThisPage []annotations.Event
-	presID := input[:len(input)-6]
+	presID := GetStringBeforeChar(input,"_")
 	var s gofpdf.SizeType
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, gofpdf.UnitMillimeter, gofpdf.PageSizeA4, "")
 	tpl := gofpdi.ImportPage(pdf, "/tmp/"+presID+"-pages/"+input, 1, "/MediaBox")
@@ -200,4 +200,11 @@ func GetIntInBetweenStr(str string, start string, end string) int {
 	e := strings.Index(str, end)
 	n, _ := strconv.Atoi(string(str[s:e]))
 	return n
+}
+
+//used to get the presentation id from filename
+func GetStringBeforeChar(str string,end string) string {
+	e := strings.Index(str, end)
+	sub := string(str[0:e])
+	return sub
 }
