@@ -1,0 +1,3 @@
+# nginx logs
+chamilo.access.log
+chamilo.error.log
