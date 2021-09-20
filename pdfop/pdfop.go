@@ -19,7 +19,7 @@ func CreateFinal(meet string, filename string) {
 	PresPath := "/var/bigbluebutton/" + meet + "/" + filename
 	foldername := filename + "-pages"
 
-	if pdf_exist(PresPath + "/" + filename + ".pdf") {
+	if Pdf_exist(PresPath + "/" + filename + ".pdf") {
 		split_pdf(PresPath+"/"+filename+".pdf", "/tmp/"+foldername)
 		AddAnnotations(meet, "/tmp/"+foldername)
 		merge_pdf("/tmp/"+foldername+"-done", filename)
@@ -81,7 +81,7 @@ func AddAnnotations(meeting string, folder string) {
 //add to one pdf file it's specefic annotations
 func InsertPage(MeetingId string, input string, output string, pageNUM int) error {
 	var ThisPage []annotations.Event
-	presID := GetStringBeforeChar(input,"_")
+	presID := GetStringBeforeChar(input, "_")
 	var s gofpdf.SizeType
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, gofpdf.UnitMillimeter, gofpdf.PageSizeA4, "")
 	tpl := gofpdi.ImportPage(pdf, "/tmp/"+presID+"-pages/"+input, 1, "/MediaBox")
@@ -185,7 +185,7 @@ func merge_pdf(foldername string, presID string) {
 }
 
 //check if a file exists
-func pdf_exist(filename string) bool {
+func Pdf_exist(filename string) bool {
 	if _, err := os.Stat(filename); err == nil {
 		return true
 	} else /* os.IsNotExist(err)*/ {
@@ -203,7 +203,7 @@ func GetIntInBetweenStr(str string, start string, end string) int {
 }
 
 //used to get the presentation id from filename
-func GetStringBeforeChar(str string,end string) string {
+func GetStringBeforeChar(str string, end string) string {
 	e := strings.Index(str, end)
 	sub := string(str[0:e])
 	return sub
