@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -16,15 +17,17 @@ func ExportDone(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	PresentationID := vars["file"]
 	MeetingID := vars["meeting"]
-	pdfop.CreateFinal(MeetingID, PresentationID)
 	Filename := "/tmp/" + PresentationID + "-final/" + PresentationID + ".pdf"
+	if !pdfop.Pdf_exist(Filename) {
+		pdfop.CreateFinal(MeetingID, PresentationID)
+		fmt.Println("file created")
+	}
 	//Check if file exists and open
 	Openfile, err := os.Open(Filename)
 	if err != nil {
 		http.Error(writer, "File not found.", 404)
 	}
 	defer Openfile.Close() //Close after function return
-
 	//File is found, create and send the correct headers
 
 	//Get the Content-Type of the file
