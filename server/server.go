@@ -16,7 +16,7 @@ func ExportDone(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	PresentationID := vars["file"]
 	MeetingID := vars["meeting"]
-	Filename := "/tmp/" + PresentationID + "-final/" + PresentationID + ".pdf"
+	Filename := pdfop.ConfVar("TempPath") + PresentationID + "-final/" + PresentationID + ".pdf"
 	if !pdfop.Pdf_exist(Filename) {
 		pdfop.CreateFinal(MeetingID, PresentationID)
 	}
@@ -57,7 +57,7 @@ func GetPage(writer http.ResponseWriter, request *http.Request) {
 	PresentationID := vars["file"]
 	MeetingID := vars["meeting"]
 	Pagenum, _ := strconv.Atoi(vars["pagenum"])
-	Filename := "/tmp/" + PresentationID + "-pages-done/" + PresentationID + "_" + strconv.Itoa(Pagenum-1) + ".pdf"
+	Filename := pdfop.ConfVar("TempPath") + PresentationID + "-pages-done/" + PresentationID + "_" + strconv.Itoa(Pagenum-1) + ".pdf"
 	if !pdfop.Pdf_exist(Filename) {
 		pdfop.CreateFinal(MeetingID, PresentationID)
 	}
@@ -98,6 +98,6 @@ func HandleRequests() {
 	myRouter := mux.NewRouter()
 	myRouter.HandleFunc("/{meeting}/{file}", ExportDone).Methods("GET")
 	myRouter.HandleFunc("/{meeting}/{file}/{pagenum}", GetPage).Methods("GET")
-	log.Printf("Serving on HTTP port: 8100\n")
-	log.Fatal(http.ListenAndServe(":8100", myRouter))
+	log.Printf("Serving on HTTP port " + pdfop.ConfVar("port"))
+	log.Fatal(http.ListenAndServe(pdfop.ConfVar("port"), myRouter))
 }

@@ -4,7 +4,10 @@ import (
 	"encoding/xml"
 	"image/color"
 	"io/ioutil"
+	"log"
 	"strconv"
+
+	"github.com/spf13/viper"
 )
 
 // Parent node of events
@@ -116,11 +119,23 @@ func (Dec_c DEC) Dec2RGBA() (c color.RGBA) {
 	return c
 }
 
+//func that returns string value from key
+func ConfVar(key string) string {
+	v := viper.New()
+	v.SetConfigFile("config.yaml")
+	err := v.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error while reading config file %s", err)
+	}
+	value := v.GetString(key)
+	return value
+}
+
 //i/o events.xml
 func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 	var data Recording
 	var InPage []Event
-	rawXmlData, _ := ioutil.ReadFile("/var/bigbluebutton/" + MeetingID + "/events.xml")
+	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBB") + MeetingID + "/events.xml")
 	xml.Unmarshal([]byte(rawXmlData), &data)
 	var k = 0
 	for _, found := range data.Event {
