@@ -17,19 +17,34 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ## How to run?
 `cd /app` or `app` alias if you are under vagrant
 
-go mod init pdfannotations
-go mod tidy
+`go get github.com/gorilla/mux`
 
-go get -u github.com/gorilla/mux
-go get -u github.com/jung-kurt/gofpdf
-go get -u github.com/llgcode/draw2d
+`go get github.com/jung-kurt/gofpdf`
+
+`go get github.com/llgcode/draw2d`
+
+`go get github.com/spf13/viper`
+
+
+Required packages for Python scripts:
+
+`pip install CairoSVG`
+
+`pip install PyPDF2`
+
 
 Run with `go run main.go`
 
+
 + start local server on port 8100 
-    - wait for get requests on :
+    - Listen on :
         http://127.0.0.1/8100/{meetingID}/{presentationID}
+
         Response: Download pdf file (local location : /tmp/presentationID-final/presentationID.pdf)
+    - Listen on :
+        http://127.0.0.1/8100/{meetingID}/{presentationID}/{PageNumber}
+        
+        Response: Download pdf file of the wanted page only (local location : /tmp/presentationID-pages-done/presentationID_PageNumber.pdf)
 
 + Create pdf file of the desired presentation with annotations on it 
     + go fetch on /var/bigbluebutton/meetingID/presentationID
