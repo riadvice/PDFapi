@@ -2,6 +2,7 @@ package pdfop
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"pdfannotations/annotations"
@@ -10,23 +11,36 @@ import (
 	"strings"
 
 	"github.com/jung-kurt/gofpdf/contrib/gofpdi"
+	"github.com/spf13/viper"
 
 	"github.com/jung-kurt/gofpdf"
 )
 
+//func that returns string value from key
+func ConfVar(key string) string {
+	v := viper.New()
+	v.SetConfigFile("config.yaml")
+	err := v.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error while reading config file %s", err)
+	}
+	value := v.GetString(key)
+	return value
+}
+
 // create presentation pdf file with annotations on it
 func CreateFinal(meet string, filename string) {
-	PresPath := "/var/bigbluebutton/" + meet + "/" + filename
+	PresPath := ConfVar("BBB") + meet + "/" + filename
 	foldername := filename + "-pages"
 
-	if pdf_exist(PresPath + "/" + filename + ".pdf") {
-		split_pdf(PresPath+"/"+filename+".pdf", "/tmp/"+foldername)
-		AddAnnotations(meet, "/tmp/"+foldername)
-		merge_pdf("/tmp/"+foldername+"-done", filename)
+	if Pdf_exist(PresPath + "/" + filename + ".pdf") {
+		split_pdf(PresPath+"/"+filename+".pdf", ConfVar("TempPath")+foldername)
+		AddAnnotations(meet, ConfVar("TempPath")+foldername)
+		merge_pdf(ConfVar("TempPath")+foldername+"-done", filename)
 	} else {
-		svg_to_pdf(PresPath+"/svgs", "/tmp/"+foldername, filename)
-		AddAnnotations(meet, "/tmp/"+foldername)
-		merge_pdf("/tmp/"+foldername+"-done", filename)
+		svg_to_pdf(PresPath+"/svgs", ConfVar("TempPath")+foldername, filename)
+		AddAnnotations(meet, ConfVar("TempPath")+foldername)
+		merge_pdf(ConfVar("TempPath")+foldername+"-done", filename)
 	}
 }
 
@@ -81,10 +95,10 @@ func AddAnnotations(meeting string, folder string) {
 //add to one pdf file it's specefic annotations
 func InsertPage(MeetingId string, input string, output string, pageNUM int) error {
 	var ThisPage []annotations.Event
-	presID := GetStringBeforeChar(input,"_")
+	presID := GetStringBeforeChar(input, "_")
 	var s gofpdf.SizeType
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, gofpdf.UnitMillimeter, gofpdf.PageSizeA4, "")
-	tpl := gofpdi.ImportPage(pdf, "/tmp/"+presID+"-pages/"+input, 1, "/MediaBox")
+	tpl := gofpdi.ImportPage(pdf, ConfVar("TempPath")+presID+"-pages/"+input, 1, "/MediaBox")
 	pageSizes := gofpdi.GetPageSizes()
 	s.Wd, s.Ht = pageSizes[1]["/MediaBox"]["w"]*0.352778, pageSizes[1]["/MediaBox"]["h"]*0.352778
 	pdf.AddPageFormat(gofpdf.OrientationPortrait, s) // Draw imported template onto page
@@ -185,7 +199,7 @@ func merge_pdf(foldername string, presID string) {
 }
 
 //check if a file exists
-func pdf_exist(filename string) bool {
+func Pdf_exist(filename string) bool {
 	if _, err := os.Stat(filename); err == nil {
 		return true
 	} else /* os.IsNotExist(err)*/ {
@@ -203,7 +217,7 @@ func GetIntInBetweenStr(str string, start string, end string) int {
 }
 
 //used to get the presentation id from filename
-func GetStringBeforeChar(str string,end string) string {
+func GetStringBeforeChar(str string, end string) string {
 	e := strings.Index(str, end)
 	sub := string(str[0:e])
 	return sub
