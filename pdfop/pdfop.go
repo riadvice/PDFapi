@@ -52,7 +52,7 @@ func split_pdf(filename string, foldername string) {
 			panic(err)
 		}
 	}
-	cmd := exec.Command("tools/split", "-i", filename, "-o", foldername)
+	cmd := exec.Command("python3", "tools/script/split.py", "-i", filename, "-o", foldername)
 	err := cmd.Run()
 	if err != nil {
 		panic(err)
@@ -67,7 +67,7 @@ func svg_to_pdf(file string, output_dir string, prefix string) {
 			panic(err)
 		}
 	}
-	cmd := exec.Command("tools/svgtopdf", "-n", prefix, "-o", output_dir, "-p", file)
+	cmd := exec.Command("python3", "tools/script/svgtopdf.py", "-n", prefix, "-o", output_dir, "-p", file)
 	err := cmd.Run()
 	if err != nil {
 		panic(err)
@@ -191,7 +191,7 @@ func merge_pdf(foldername string, presID string) {
 			panic(err)
 		}
 	}
-	cmd := exec.Command("tools/merge", "-p", foldername, "-o", out_dir+"/"+presID+".pdf", "-n", presID)
+	cmd := exec.Command("python3", "tools/script/merge.py", "-p", foldername, "-o", out_dir+"/"+presID+".pdf", "-n", presID)
 	err := cmd.Run()
 	if err != nil {
 		panic(err)
