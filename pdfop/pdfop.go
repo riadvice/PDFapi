@@ -187,6 +187,7 @@ func AddAnnotations(meetingId string, dirDone string) {
 	}
 	for _, f := range files {
 <<<<<<< HEAD
+<<<<<<< HEAD
 		pageNumber := GetIntInBetweenStr(f.Name(), "_", ".pdf")
 		err := InsertPage(meetingId, f.Name(), dirDone+"-done"+"/"+f.Name(), pageNumber)
 ||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
@@ -194,6 +195,11 @@ func AddAnnotations(meetingId string, dirDone string) {
 		err := InsertPage(meeting, f.Name(), folder+"-done"+"/"+f.Name(), pageN)
 =======
 		pageNumber, _ := strconv.Atoi(strings.TrimLeft(strings.TrimRight(f.Name(), ""), ".pdf"))
+||||||| parent of 783c275 (Fix annotation page matching.)
+		pageNumber, _ := strconv.Atoi(strings.TrimLeft(strings.TrimRight(f.Name(), ""), ".pdf"))
+=======
+		pageNumber := GetIntInBetweenStr(f.Name(), "_", ".pdf")
+>>>>>>> 783c275 (Fix annotation page matching.)
 		err := InsertPage(meetingId, f.Name(), dirDone+"-done"+"/"+f.Name(), pageNumber)
 >>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 		if err != nil {
@@ -481,6 +487,7 @@ func PdfExist(filename string) bool {
 	}
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 //used to get the page number of the selected filename
 func GetIntInBetweenStr(str string, start string, end string) int {
@@ -509,3 +516,15 @@ func GetStringBeforeChar(str string, end string) string {
 }
 =======
 >>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
+||||||| parent of 783c275 (Fix annotation page matching.)
+=======
+
+//used to get the page number of the selected filename
+func GetIntInBetweenStr(str string, start string, end string) int {
+	s := strings.Index(str, start)
+	s += len(start)
+	e := strings.Index(str, end)
+	n, _ := strconv.Atoi(string(str[s:e]))
+	return n
+}
+>>>>>>> 783c275 (Fix annotation page matching.)
