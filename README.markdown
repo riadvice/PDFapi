@@ -25,12 +25,18 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 `go get github.com/spf13/viper`
 
+<<<<<<< HEAD
 `go get github.com/sirupsen/logrus`
 
 `go get github.com/01walid/goarabic`
 
 `go get github.com/pdfcpu/pdfcpu`
 
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+=======
+`go get github.com/sirupsen/logrus`
+
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 
 Required packages for Python scripts:
 
@@ -43,10 +49,19 @@ Run with `go run main.go`
 
 
 + start local server on port 8100 
+<<<<<<< HEAD
     - Listen for GET request on :
         http://127.0.0.1:8100/{meetingID}/{presentationID}
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+    - Listen on :
+        http://127.0.0.1/8100/{meetingID}/{presentationID}
+=======
+    - Listen on :
+        http://127.0.0.1:8100/{meetingID}/{presentationID}
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 
         Response: Download pdf file (local location : /tmp/presentationID-final/presentationID.pdf)
+<<<<<<< HEAD
 
     - Listen for POST request on :
         http://127.0.0.1:8100/{meetingID}/{presentationID}
@@ -55,6 +70,13 @@ Run with `go run main.go`
 
     - Listen for GET request on :
         http://127.0.0.1:8100/{meetingID}/{presentationID}/{PageNumber}
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+    - Listen on :
+        http://127.0.0.1/8100/{meetingID}/{presentationID}/{PageNumber}
+=======
+    - Listen on :
+        http://127.0.0.1:8100/{meetingID}/{presentationID}/{PageNumber}
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
         
         Response: Download pdf file of the wanted page only (local location : /tmp/presentationID-pages-done/presentationID_PageNumber.pdf)
 

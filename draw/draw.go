@@ -10,6 +10,8 @@ import (
 	"github.com/01walid/goarabic"
 	log "github.com/sirupsen/logrus"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/jung-kurt/gofpdf"
 	"github.com/llgcode/draw2d"
 	"github.com/llgcode/draw2d/draw2dpdf"
@@ -102,6 +104,7 @@ func DrawRectangle(pdf *gofpdf.Fpdf, rectangle annotations.ShapeDetails, size go
 	pdf.Rect(x, y, width, height, "")
 }
 
+<<<<<<< HEAD
 // checkifArabic is Arabic characters or not.
 func checkifArabic(input string) bool {
 
@@ -123,7 +126,13 @@ func checkifArabic(input string) bool {
 //split text sting into multiple lines based on text box height
 //insert each line as text cell and check if out of box boundaries
 
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+//function to write text to pdf in  proportional coordinates based on the page size
+=======
+// function to write text to pdf in  proportional coordinates based on the page size
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 func WriteText(pdf *gofpdf.Fpdf, text annotations.TextDetails, size gofpdf.SizeType) {
+<<<<<<< HEAD
 	log.Info("Writing text")
 	pdf.SetTextColor(text.Color.Red, text.Color.Green, text.Color.Blue)
 	pdf.SetFont("Arial-0", "", 0)
@@ -173,6 +182,10 @@ func WriteText(pdf *gofpdf.Fpdf, text annotations.TextDetails, size gofpdf.SizeT
 /*
 func oldWrite(pdf *gofpdf.Fpdf, text annotations.TextDetails, size gofpdf.SizeType) {
 	log.Info("Writing text")
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+=======
+	log.Info("Writing text")
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 	pdf.SetTextColor(text.Color.Red, text.Color.Green, text.Color.Blue)
 	pdf.SetFont("Arial", "", 0)
 	pdf.SetFontUnitSize((text.CalcedSize / 100) * size.Ht)
@@ -236,6 +249,7 @@ func DenormalizeCoord(normCoord float64, sideLength float64) float64 {
 }
 
 //get calculated stroke width based on percantage of coordinates on page size
+<<<<<<< HEAD
 func GetStrokeWidth(thickness float64, slideWidth float64) float64 {
 	return (thickness * slideWidth) * 0.01
 }
@@ -263,4 +277,11 @@ func DrawGrid(pdf *gofpdf.Fpdf) {
 		pdf.Text(0, y, fmt.Sprintf("%d", int(y)))
 	}
 
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+func getStrokeWidth(thickness float64, slideWidth float64) float64 {
+	return (thickness * slideWidth) / 100
+=======
+func GetStrokeWidth(thickness float64, slideWidth float64) float64 {
+	return (thickness * slideWidth) * 0.01
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 }

@@ -1,6 +1,16 @@
+<<<<<<< HEAD
 port: 8100
 OutputPath: /tmp/
 BBBPresPath: /var/bigbluebutton/
 ScriptDir: /usr/share/bbb-api-pyscript/
 EventsPath: /var/bigbluebutton/
 FontPath: /home/taktak/Desktop/bigbluebutton-annotations-api-server/font/
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+port: :8100
+TempPath: /tmp/
+BBB: /var/bigbluebutton/
+=======
+port: 8100
+OutputPath: /var/bigbluebutton/inbox/
+BBBPresPath: /var/bigbluebutton/
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
