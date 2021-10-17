@@ -99,7 +99,7 @@ func AddAnnotations(meetingId string, dirDone string) {
 		}
 	}
 	for _, f := range files {
-		pageNumber, _ := strconv.Atoi(strings.TrimLeft(strings.TrimRight(f.Name(), ""), ".pdf"))
+		pageNumber := GetIntInBetweenStr(f.Name(), "_", ".pdf")
 		err := InsertPage(meetingId, f.Name(), dirDone+"-done"+"/"+f.Name(), pageNumber)
 		if err != nil {
 			panic(err)
@@ -223,4 +223,13 @@ func PdfExist(filename string) bool {
 	} else /* os.IsNotExist(err)*/ {
 		return false
 	}
+}
+
+//used to get the page number of the selected filename
+func GetIntInBetweenStr(str string, start string, end string) int {
+	s := strings.Index(str, start)
+	s += len(start)
+	e := strings.Index(str, end)
+	n, _ := strconv.Atoi(string(str[s:e]))
+	return n
 }
