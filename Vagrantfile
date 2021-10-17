@@ -51,6 +51,7 @@ Vagrant.configure("2") do |config|
 
   # sync: folder "bbb-lb" (host machine) -> folder "/app" (guest machine)
   config.vm.synced_folder "./", "/app", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder "./bigbluebutton", "/var/bigbluebutton", owner: "vagrant", group: "vagrant"
 
   # disable folder "/vagrant" (guest machine)
   config.vm.synced_folder ".", "/vagrant", disabled: true

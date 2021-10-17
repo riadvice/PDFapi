@@ -27,6 +27,9 @@ sudo wget https://dl.google.com/go/go1.17.1.linux-amd64.tar.gz
 sudo tar -xvf go1.17.1.linux-amd64.tar.gz
 sudo mv go /usr/local
 
+info "Install Pythong3 and package"
+sudo apt install python3-cairosvg
+
 info "Configure NGINX"
 sudo sed -i 's/user www-data/user vagrant/g' /etc/nginx/nginx.conf
 echo "Done!"

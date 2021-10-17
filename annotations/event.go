@@ -135,7 +135,7 @@ func ConfVar(key string) string {
 func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 	var data Recording
 	var InPage []Event
-	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBB") + MeetingID + "/events.xml")
+	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBBPresPath") + MeetingID + "/events.xml")
 	xml.Unmarshal([]byte(rawXmlData), &data)
 	var k = 0
 	for _, found := range data.Event {
