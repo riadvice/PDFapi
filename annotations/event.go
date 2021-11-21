@@ -124,6 +124,7 @@ func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 	var data Recording
 	var InPage []Event
 <<<<<<< HEAD
+<<<<<<< HEAD
 	rawXmlData, err := ioutil.ReadFile(config.EVENTS + MeetingID + "/events.xml")
 	if err != nil {
 		log.Fatal("Can't read events.xml file")
@@ -131,8 +132,24 @@ func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 ||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
 	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBB") + MeetingID + "/events.xml")
 =======
+||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
+=======
+<<<<<<< HEAD
+>>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBBPresPath") + MeetingID + "/events.xml")
+<<<<<<< HEAD
 >>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
+||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
+=======
+||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
+	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBB") + MeetingID + "/events.xml")
+=======
+	rawXmlData, err := ioutil.ReadFile(config.EVENTS + MeetingID + "/events.xml")
+	if err != nil {
+		log.Fatal("Can't read events.xml file")
+	}
+>>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
+>>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 	xml.Unmarshal([]byte(rawXmlData), &data)
 	var k = 0
 	for _, found := range data.Event {

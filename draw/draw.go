@@ -105,6 +105,43 @@ func DrawRectangle(pdf *gofpdf.Fpdf, rectangle annotations.ShapeDetails, size go
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+// checkifArabic is Arabic characters or not.
+func checkifArabic(input string) bool {
+
+	var isArabic = false
+
+	for _, v := range input {
+		if unicode.In(v, unicode.Arabic) {
+			isArabic = true
+		} else {
+			isArabic = false
+		}
+	}
+	return isArabic
+}
+
+||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
+=======
+<<<<<<< HEAD
+>>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
+// function to write text to pdf in  proportional coordinates based on the page size
+<<<<<<< HEAD
+
+//move cursor to x and y
+//split text sting into multiple lines based on text box height
+//insert each line as text cell and check if out of box boundaries
+
+||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
+//function to write text to pdf in  proportional coordinates based on the page size
+=======
+// function to write text to pdf in  proportional coordinates based on the page size
+>>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
+||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
+=======
+||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
+//function to write text to pdf in  proportional coordinates based on the page size
+=======
 // checkifArabic is Arabic characters or not.
 func checkifArabic(input string) bool {
 
@@ -126,14 +163,63 @@ func checkifArabic(input string) bool {
 //split text sting into multiple lines based on text box height
 //insert each line as text cell and check if out of box boundaries
 
-||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
-//function to write text to pdf in  proportional coordinates based on the page size
-=======
-// function to write text to pdf in  proportional coordinates based on the page size
->>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
+>>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
+>>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 func WriteText(pdf *gofpdf.Fpdf, text annotations.TextDetails, size gofpdf.SizeType) {
 <<<<<<< HEAD
 	log.Info("Writing text")
+||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
+=======
+	log.Info("Writing text")
+	pdf.SetTextColor(text.Color.Red, text.Color.Green, text.Color.Blue)
+	pdf.SetFont("Arial-0", "", 0)
+	pdf.SetFontUnitSize(denormalizeFont(text.CalcedSize, size.Ht))
+	x := DenormalizeCoord(text.X, size.Wd)
+	y := DenormalizeCoord(text.Y, size.Ht)
+	BoxWidth := DenormalizeCoord(text.Width, size.Wd)
+	BoxHeight := DenormalizeCoord(text.Height, size.Ht)
+	pdf.SetAutoPageBreak(false, 0)
+	/*
+		pdf.SetFillColor(255, 0, 0)
+		pdf.Circle(x, y, 1.0, "F")
+		pdf.SetDrawColor(0, 255, 0)
+		pdf.Rect(x, y, BoxWidth, BoxHeight, "D")
+	*/
+	if text.Text != "" {
+		if checkifArabic(text.Text) {
+			pdf.RTL()
+			lineHt, _ := pdf.GetFontSize()
+			pdf.MoveTo(x-1, y+1.7)
+			lines := pdf.SplitText((text.Text), size.Wd)
+			for i, line := range lines {
+				if (float64(i) * lineHt) < BoxHeight {
+					pdf.CellFormat(BoxWidth, lineHt, goarabic.ToGlyph(string(line)), "", 2, "LT", false, 0, "")
+				} else {
+					break
+				}
+			}
+		} else {
+			pdf.LTR()
+			lineHt, _ := pdf.GetFontSize()
+			lineHt = lineHt * 0.4055
+			lines := pdf.SplitLines([]byte(text.Text), size.Wd)
+			pdf.MoveTo(x-1, y+1.7)
+			for i, line := range lines {
+				if (float64(i) * lineHt) < BoxHeight {
+					pdf.CellFormat(BoxWidth, lineHt, string(line), "", 2, "LT", false, 0, "")
+				} else {
+					break
+				}
+
+			}
+		}
+	}
+}
+
+/*
+func oldWrite(pdf *gofpdf.Fpdf, text annotations.TextDetails, size gofpdf.SizeType) {
+	log.Info("Writing text")
+>>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
 	pdf.SetTextColor(text.Color.Red, text.Color.Green, text.Color.Blue)
 	pdf.SetFont("Arial-0", "", 0)
 	pdf.SetFontUnitSize(denormalizeFont(text.CalcedSize, size.Ht))
@@ -250,9 +336,21 @@ func DenormalizeCoord(normCoord float64, sideLength float64) float64 {
 
 //get calculated stroke width based on percantage of coordinates on page size
 <<<<<<< HEAD
+<<<<<<< HEAD
+||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
+=======
+<<<<<<< HEAD
+func GetStrokeWidth(thickness float64, slideWidth float64) float64 {
+	return (thickness * slideWidth) * 0.01
+||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
+func getStrokeWidth(thickness float64, slideWidth float64) float64 {
+	return (thickness * slideWidth) / 100
+=======
+>>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 func GetStrokeWidth(thickness float64, slideWidth float64) float64 {
 	return (thickness * slideWidth) * 0.01
 }
+<<<<<<< HEAD
 
 //get normalized font size based on percantage of page size
 func denormalizeFont(calced float64, slideHeight float64) float64 {
@@ -285,3 +383,32 @@ func GetStrokeWidth(thickness float64, slideWidth float64) float64 {
 	return (thickness * slideWidth) * 0.01
 >>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
 }
+||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
+=======
+
+//get normalized font size based on percantage of page size
+func denormalizeFont(calced float64, slideHeight float64) float64 {
+	return (calced * slideHeight) / 100
+}
+
+//draw grid as visual refernce for move to
+func DrawGrid(pdf *gofpdf.Fpdf) {
+	w, h := pdf.GetPageSize()
+	pdf.SetFont("courier", "", 12)
+	pdf.SetTextColor(0, 0, 100)
+	pdf.SetDrawColor(200, 200, 200)
+	for x := 0.0; x < w; x = x + (w / 20.0) { //del Letter size
+		pdf.Line(x, 0, x, h)
+		_, lineHeight := pdf.GetFontSize()
+		pdf.Text(x, lineHeight, fmt.Sprintf("%d", int(x)))
+	}
+
+	for y := 0.0; y < h; y = y + (w / 20.0) { //del Letter size
+		pdf.Line(0, y, w, y)
+		//_, lineHeight := pdf.GetFontSize()
+		pdf.Text(0, y, fmt.Sprintf("%d", int(y)))
+	}
+
+>>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
+}
+>>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
