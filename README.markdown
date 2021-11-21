@@ -25,6 +25,12 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 `go get github.com/spf13/viper`
 
+`go get github.com/sirupsen/logrus`
+
+`go get github.com/01walid/goarabic`
+
+`go get github.com/pdfcpu/pdfcpu`
+
 
 Required packages for Python scripts:
 
@@ -37,17 +43,24 @@ Run with `go run main.go`
 
 
 + start local server on port 8100 
-    - Listen on :
-        http://127.0.0.1/8100/{meetingID}/{presentationID}
+    - Listen for GET request on :
+        http://127.0.0.1:8100/{meetingID}/{presentationID}
 
         Response: Download pdf file (local location : /tmp/presentationID-final/presentationID.pdf)
-    - Listen on :
-        http://127.0.0.1/8100/{meetingID}/{presentationID}/{PageNumber}
+
+    - Listen for POST request on :
+        http://127.0.0.1:8100/{meetingID}/{presentationID}
+        example request (post.sh)
+        Response: Download pdf file (local location : /tmp/presentationID-final/presentationID.pdf)
+
+    - Listen for GET request on :
+        http://127.0.0.1:8100/{meetingID}/{presentationID}/{PageNumber}
         
         Response: Download pdf file of the wanted page only (local location : /tmp/presentationID-pages-done/presentationID_PageNumber.pdf)
 
+
 + Create pdf file of the desired presentation with annotations on it 
-    + go fetch on /var/bigbluebutton/meetingID/presentationID
+    + go fetch on /var/bigbluebutton/meetingID/meetingID/presentationID
         + if pdf file (presentationID.pdf) exists 
             - split the pdf file into single pdf pages and save them on /tmp/presentationID-pages
             + add annotations on every page 

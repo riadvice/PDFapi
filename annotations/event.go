@@ -1,13 +1,13 @@
 package annotations
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"image/color"
 	"io/ioutil"
 	"log"
+	"pdfannotations/config"
 	"strconv"
-
-	"github.com/spf13/viper"
 )
 
 // Parent node of events
@@ -119,23 +119,14 @@ func (Dec_c DEC) Dec2RGBA() (c color.RGBA) {
 	return c
 }
 
-//func that returns string value from key
-func ConfVar(key string) string {
-	v := viper.New()
-	v.SetConfigFile("config.yaml")
-	err := v.ReadInConfig()
-	if err != nil {
-		log.Fatalf("Error while reading config file %s", err)
-	}
-	value := v.GetString(key)
-	return value
-}
-
 //i/o events.xml
 func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 	var data Recording
 	var InPage []Event
-	rawXmlData, _ := ioutil.ReadFile(ConfVar("BBB") + MeetingID + "/events.xml")
+	rawXmlData, err := ioutil.ReadFile(config.EVENTS + MeetingID + "/events.xml")
+	if err != nil {
+		log.Fatal("Can't read events.xml file")
+	}
 	xml.Unmarshal([]byte(rawXmlData), &data)
 	var k = 0
 	for _, found := range data.Event {
@@ -153,4 +144,29 @@ func PageShapes(MeetingID string, PresentationID string, PageNum int) []Event {
 		}
 	}
 	return (InPage)
+}
+
+//i/o events.xml
+func PageShapesFromRaw(MeetingID string, PresentationID string, PageNum int, Raw []byte) []Event {
+	var InPage []Event
+	var result []Event
+
+	json.Unmarshal([]byte(Raw), &InPage)
+
+	var k = 0
+	for _, found := range InPage {
+		if (found.Eventname) == "AddShapeEvent" && found.Presentation == PresentationID && found.PageNumber == PageNum {
+			result = append(result, found)
+			k++
+		}
+		if (found.Eventname) == "UndoAnnotationEvent" && found.Presentation == PresentationID && found.PageNumber == PageNum {
+			result = append(result[:k-1], result[k:]...)
+			k -= 2
+		}
+		if (found.Eventname) == "ClearWhiteboardEvent" && found.Presentation == PresentationID && found.PageNumber == PageNum {
+			result = nil //InPage[:0]
+			k = 0
+		}
+	}
+	return (result)
 }
