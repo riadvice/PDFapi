@@ -7,30 +7,9 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/llgcode/draw2d v0.0.0-20210904075650-80aa0a2a901d
-<<<<<<< HEAD
-<<<<<<< HEAD
-	github.com/pdfcpu/pdfcpu v0.3.12
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-<<<<<<< HEAD
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
-	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/viper v1.9.0
-<<<<<<< HEAD
-||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
-=======
-	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/viper v1.9.0
->>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
-=======
 	github.com/pdfcpu/pdfcpu v0.3.12
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
->>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 )
 
 require (
@@ -49,32 +28,8 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-<<<<<<< HEAD
-<<<<<<< HEAD
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
-||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
-	golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
-=======
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-<<<<<<< HEAD
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
-	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d // indirect
-	golang.org/x/sys v0.0.0-20210925032602-92d5a993a665 // indirect
-<<<<<<< HEAD
->>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
-	golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
-=======
-	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
->>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 	golang.org/x/text v0.3.6 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -25,31 +25,12 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 `go get github.com/spf13/viper`
 
-<<<<<<< HEAD
-`go get github.com/sirupsen/logrus`
-
-<<<<<<< HEAD
-`go get github.com/01walid/goarabic`
-
-`go get github.com/pdfcpu/pdfcpu`
-
-||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
-=======
-`go get github.com/sirupsen/logrus`
-
->>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
-=======
 `go get github.com/sirupsen/logrus`
 
 `go get github.com/01walid/goarabic`
 
 `go get github.com/pdfcpu/pdfcpu`
 
->>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 
 Required packages for Python scripts:
 
@@ -62,36 +43,10 @@ Run with `go run main.go`
 
 
 + start local server on port 8100 
-<<<<<<< HEAD
-<<<<<<< HEAD
     - Listen for GET request on :
         http://127.0.0.1:8100/{meetingID}/{presentationID}
-||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
-    - Listen on :
-        http://127.0.0.1/8100/{meetingID}/{presentationID}
-=======
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-<<<<<<< HEAD
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
-    - Listen on :
-        http://127.0.0.1:8100/{meetingID}/{presentationID}
-<<<<<<< HEAD
->>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
-    - Listen on :
-        http://127.0.0.1/8100/{meetingID}/{presentationID}
-=======
-    - Listen for GET request on :
-        http://127.0.0.1:8100/{meetingID}/{presentationID}
->>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
 
         Response: Download pdf file (local location : /tmp/presentationID-final/presentationID.pdf)
-<<<<<<< HEAD
-<<<<<<< HEAD
 
     - Listen for POST request on :
         http://127.0.0.1:8100/{meetingID}/{presentationID}
@@ -100,34 +55,6 @@ Run with `go run main.go`
 
     - Listen for GET request on :
         http://127.0.0.1:8100/{meetingID}/{presentationID}/{PageNumber}
-||||||| parent of bd6f49b (- Add Vagrant configuration for dev.)
-    - Listen on :
-        http://127.0.0.1/8100/{meetingID}/{presentationID}/{PageNumber}
-=======
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-<<<<<<< HEAD
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
-    - Listen on :
-        http://127.0.0.1:8100/{meetingID}/{presentationID}/{PageNumber}
-<<<<<<< HEAD
->>>>>>> bd6f49b (- Add Vagrant configuration for dev.)
-||||||| parent of ddf7b04 (config + post + write text + arabic + optimization)
-=======
-||||||| parent of 2c42ff1 (config + post + write text + arabic + optimization)
-    - Listen on :
-        http://127.0.0.1/8100/{meetingID}/{presentationID}/{PageNumber}
-=======
-
-    - Listen for POST request on :
-        http://127.0.0.1:8100/{meetingID}/{presentationID}
-        example request (post.sh)
-        Response: Download pdf file (local location : /tmp/presentationID-final/presentationID.pdf)
-
-    - Listen for GET request on :
-        http://127.0.0.1:8100/{meetingID}/{presentationID}/{PageNumber}
->>>>>>> 2c42ff1 (config + post + write text + arabic + optimization)
->>>>>>> ddf7b04 (config + post + write text + arabic + optimization)
         
         Response: Download pdf file of the wanted page only (local location : /tmp/presentationID-pages-done/presentationID_PageNumber.pdf)
 
