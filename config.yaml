@@ -1,6 +1,6 @@
 port: 8100
 OutputPath: /tmp/
 BBBPresPath: /var/bigbluebutton/
-ScriptDir: /usr/share/bbb-api-pyscript/
+ScriptDir: /app/tools/script/
 EventsPath: /var/bigbluebutton/
-FontPath: /home/taktak/Desktop/bigbluebutton-annotations-api-server/font/
+FontPath: /app/fonts/

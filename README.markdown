@@ -145,4 +145,9 @@ Run API with  `go run main.go`
   "position": 0,
   "dataPoints": "52.42053561740452,52.905454282407405"
  }
-]' 
+]'
+```
+
+# Convert XML to json annotations
+
+Just use `test.go` application
