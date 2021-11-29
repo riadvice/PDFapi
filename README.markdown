@@ -33,12 +33,11 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 
 Required packages for Python scripts:
-
-`pip install CairoSVG`
-
 `pip install PyPDF2`
 
+librsvg2-bin required for svg to pdf conversion (`rsvg-convert`)
 
+`sudo apt-get install librsvg2-bin`
 Run with `go run main.go`
 
 
