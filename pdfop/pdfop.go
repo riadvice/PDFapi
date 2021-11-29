@@ -87,12 +87,13 @@ func SvgToPdf(fileName string, outputDir string, prefix string) {
 			panic(err)
 		}
 	}
-
-	log.WithFields(log.Fields{"fileName": fileName, "outputDir": outputDir, "prefix": prefix}).Info("Converting SVG files to a single PDF")
-	cmd := exec.Command("python3", config.SCRIPT_PATH+"svgtopdf.py", "-n", prefix, "-o", outputDir, "-p", fileName)
-	err := cmd.Run()
-	if err != nil {
-		panic(err)
+	files, _ := ioutil.ReadDir(fileName)
+	for i := range files {
+		cmd := exec.Command("rsvg-convert", "-f", "pdf", "-o", outputDir+"/"+prefix+"_"+strconv.Itoa(i)+".pdf", fileName+"/slide"+strconv.Itoa(i+1)+".svg")
+		err := cmd.Run()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
